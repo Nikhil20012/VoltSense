@@ -1,4 +1,27 @@
-# VoltSense
+<div align="center">
+
+# ⚡ VoltSense
+
+**Real-time EV charging demand intelligence platform with spatial forecasting**
+
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Kafka](https://img.shields.io/badge/Apache_Kafka-Streaming-231F20?style=flat-square&logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![Snowflake](https://img.shields.io/badge/Snowflake-Warehouse-29B5E8?style=flat-square&logo=snowflake&logoColor=white)](https://www.snowflake.com/)
+[![dbt](https://img.shields.io/badge/dbt-Transforms-FF694B?style=flat-square&logo=dbt&logoColor=white)](https://www.getdbt.com/)
+[![Airflow](https://img.shields.io/badge/Airflow-Orchestration-017CEE?style=flat-square&logo=apacheairflow&logoColor=white)](https://airflow.apache.org/)
+[![LightGBM](https://img.shields.io/badge/LightGBM-Forecasting-02569B?style=flat-square&logo=microsoft&logoColor=white)](https://lightgbm.readthedocs.io/)
+[![AWS Lambda](https://img.shields.io/badge/AWS_Lambda-Batch_Ingestion-FF9900?style=flat-square&logo=awslambda&logoColor=white)](https://aws.amazon.com/lambda/)
+[![Amazon S3](https://img.shields.io/badge/Amazon_S3-Raw_Landing-569A31?style=flat-square&logo=amazons3&logoColor=white)](https://aws.amazon.com/s3/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Model_Serving-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Power BI](https://img.shields.io/badge/Power_BI-Executive_BI-F2C811?style=flat-square&logo=powerbi&logoColor=black)](https://powerbi.microsoft.com/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Operator_Console-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
+`IN PROGRESS`
+
+</div>
+
+---
 
 Real-time EV charging demand intelligence platform.
 
@@ -148,8 +171,12 @@ See [docs/folder_guide.md](docs/folder_guide.md) for details on each folder.
 ## Author
 
 **Nikhil Bharadwaj Yellapragada**
-- [LinkedIn](https://www.linkedin.com/in/nikhil-bharadwaj-yellapragada-48321a211/)
-- [GitHub](https://github.com/Nikhil20012)
+<br>
+MS Data Analytics Engineering, Northeastern University
+
+[![LinkedIn](https://img.shields.io/badge/-LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/nikhil-bharadwaj-yellapragada-48321a211/)
+[![Email](https://img.shields.io/badge/-Email-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:yellapragada.n@northeastern.edu)
+[![GitHub](https://img.shields.io/badge/-GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/Nikhil20012)
 
 ## License
 
