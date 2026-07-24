@@ -4,10 +4,12 @@ What each folder does, why it exists, and when it gets built.
 
 ```
 voltsense/
-├── simulator/                 Step 1 - where data is generated
+├── simulator/                 Step 1 - charger event producer (Kafka)
+├── lambdas/                   Phase 2 - weather and grid pricing API pullers (AWS)
 ├── scripts/                   Steps 0-2 - helper scripts
 ├── dbt/voltsense_dbt/         Steps 3-5 - where data is transformed
 ├── ml/                        Step 6 - model training and prediction
+├── api/                       Phase 3 - FastAPI model serving
 ├── airflow/                   Step 7 - pipeline automation
 ├── streamlit/                 Step 9 - operator-facing dashboard
 ├── powerbi/                   Step 8 - executive-facing dashboards
@@ -19,8 +21,9 @@ voltsense/
 ## simulator/
 
 Generates realistic EV charger events and sends them to Kafka. This is the
-data source for the entire pipeline. Events follow the OCPP protocol format
-that real chargers use (session start, periodic heartbeats, session end).
+high-volume streaming data source (~164K events/day). Events follow the OCPP
+protocol format that real chargers use (session start, periodic heartbeats,
+session end).
 
 The simulator models station-specific demand patterns. Highway stations peak
 at travel hours, workplace stations peak 9-to-5, and so on.
@@ -28,12 +31,43 @@ at travel hours, workplace stations peak 9-to-5, and so on.
 ```
 simulator/
 ├── charger_simulator.py      Generates charging events, produces to Kafka
-├── weather_producer.py       Polls Open-Meteo API, produces to Kafka
-├── grid_price_producer.py    Simulates electricity pricing, produces to Kafka
 ├── station_profiles.py       Demand curves per station type
 ├── config.yml                Simulation parameters
 └── requirements.txt
 ```
+
+Weather and grid pricing are handled by Lambda functions, not the simulator.
+Those are low-volume periodic API pulls that don't need Kafka.
+
+## lambdas/
+
+Two AWS Lambda functions that pull from external APIs on a schedule and
+write JSON files to S3. CloudWatch Events triggers them.
+
+```
+lambdas/
+├── weather_puller/
+│   ├── handler.py            Pulls Open-Meteo API every 15 min, writes to S3
+│   └── requirements.txt
+└── grid_price_puller/
+    ├── handler.py            Pulls EIA API every 5 min, writes to S3
+    └── requirements.txt
+```
+
+Why Lambda instead of Kafka for these? Weather produces 288 readings/day.
+Grid pricing produces 864 readings/day. Running those through a distributed
+streaming platform is unnecessary overhead. Lambda on a CloudWatch schedule
+is the right tool for periodic, low-volume API pulls.
+
+S3 output structure:
+```
+s3://voltsense-raw/
+├── weather/2026/07/22/00-00.json
+├── weather/2026/07/22/00-15.json
+└── grid_pricing/2026/07/22/00-00.json
+```
+
+Snowflake loads from S3 via an external stage.
 
 ## scripts/
 
@@ -43,7 +77,7 @@ Utility scripts that don't belong to a specific component.
 scripts/
 ├── generate_station_seed.py  Creates 200 stations with Boston-area coordinates
 ├── kafka_to_snowflake.py     Dev bridge: reads Kafka, inserts into Snowflake
-└── setup_snowflake.sql       Database and schema creation SQL
+└── setup_snowflake.sql       Database, schema, stage, and table creation SQL
 ```
 
 `kafka_to_snowflake.py` is a development shortcut. In production you would use
@@ -52,8 +86,11 @@ does the same job and is simpler to set up.
 
 ## dbt/voltsense_dbt/
 
-Takes raw JSON in Snowflake and transforms it through three layers into clean,
-tested tables for Power BI and ML.
+Takes raw data in Snowflake (from both Kafka and S3 sources) and transforms
+it through three layers into clean, tested tables for Power BI and ML.
+
+From staging onward, dbt doesn't know or care whether data arrived via
+Kafka or S3. It's all in Snowflake RAW tables at that point.
 
 ```
 dbt/voltsense_dbt/
@@ -101,6 +138,22 @@ ml/
 └── requirements.txt
 ```
 
+## api/
+
+FastAPI application that serves LightGBM predictions via REST API.
+
+```
+api/
+├── main.py                   Endpoints: /health, /predict, /simulate
+├── requirements.txt
+└── Dockerfile
+```
+
+The Streamlit pricing simulator does live model inference, but that's a UI
+tool. The FastAPI endpoint is a proper API that any downstream system can
+consume. It loads the trained model at startup and reads recent features
+from Snowflake for the requested station.
+
 ## airflow/dags/
 
 One DAG that runs the full pipeline daily: dbt transforms, data quality tests,
@@ -121,16 +174,13 @@ Interactive dashboard for station operators. Different audience from Power BI:
 operators need real-time health monitoring and the ability to run pricing
 simulations, not quarterly revenue reports.
 
-The pricing simulator loads the trained LightGBM model locally and runs
-inference with modified price inputs. This is something Power BI cannot do.
-
 ```
 streamlit/
 ├── app.py                    Multi-page entry point
 ├── pages/
 │   ├── 1_station_health.py   Station map with anomaly alerts
 │   ├── 2_demand_forecast.py  Predicted vs actual utilization
-│   └── 3_pricing_sim.py      What-if pricing simulator (runs live ML inference)
+│   └── 3_pricing_sim.py      What-if pricing simulator
 ├── utils/
 │   ├── snowflake_client.py   Query helper with caching
 │   └── map_utils.py          Map rendering
