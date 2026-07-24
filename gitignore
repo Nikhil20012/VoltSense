@@ -1,0 +1,54 @@
+# Secrets and credentials
+.env
+*.env.local
+infrastructure/docker/.env
+snowflake_creds.json
+dbt/voltsense_dbt/profiles.yml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+env/
+
+# dbt artifacts
+dbt/voltsense_dbt/target/
+dbt/voltsense_dbt/dbt_packages/
+dbt/voltsense_dbt/logs/
+
+# ML model artifacts
+ml/model/
+streamlit/model/*.txt
+streamlit/model/*.pkl
+*.pkl
+*.joblib
+!streamlit/model/.gitkeep
+
+# Power BI binary files
+powerbi/*.pbix
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Docker volumes
+infrastructure/docker/volumes/
