@@ -2,10 +2,11 @@
 
 Real-time EV charging demand intelligence platform.
 
-Ingests simulated charger telemetry via Apache Kafka, lands it in Snowflake
-through Snowpipe Streaming, transforms it through a dbt medallion architecture
-with spatial demand features, trains a LightGBM forecasting model, orchestrates
-the pipeline with Airflow, and serves insights through Power BI and Streamlit.
+Ingests simulated charger telemetry via Apache Kafka into Snowflake, pulls
+weather and grid pricing data through AWS Lambda into S3, transforms everything
+through a dbt medallion architecture with spatial demand features, trains a
+LightGBM forecasting model, serves predictions via FastAPI, orchestrates the
+pipeline with Airflow, and delivers insights through Power BI and Streamlit.
 
 ## Problem
 
@@ -38,35 +39,54 @@ to a station-only baseline.
 
 ## Architecture
 
-```
-Simulator (Python) --> Kafka topics --> Snowflake RAW tables
-                                            |
-                                       dbt transforms
-                                            |
-                               staging --> intermediate --> marts
-                                               |
-                                        spatial features
-                                        (Haversine pairs,
-                                         neighbor utilization,
-                                         cluster saturation)
-                                               |
-                              +----------------+----------------+
-                              |                |                |
-                          Power BI         Streamlit        LightGBM
-                        (executives)      (operators)      (forecasting)
+The architecture puts the right tool on the right workload. Charger telemetry
+is high-volume streaming (~164K events/day) and goes through Kafka. Weather
+and grid pricing are low-volume periodic API pulls (288 and 864 readings/day)
+and go through Lambda + S3.
 
-                    Airflow orchestrates the daily pipeline
+```
+Charger sessions (~164K events/day)
+        |
+     Kafka (1 topic, 12 partitions)
+        |
+   Snowpipe Streaming
+        |
+        v
+   Snowflake RAW  <---  S3 (external stage)  <---  Lambda (scheduled)
+        |                      ^        ^               |         |
+        |                      |        |          Weather    Grid pricing
+   dbt transforms         weather/  grid_pricing/  (15 min)    (5 min)
+        |                                          Open-Meteo    EIA API
+   staging -> intermediate -> marts
+                    |
+             spatial features
+             (Haversine pairs,
+              neighbor util,
+              cluster saturation)
+                    |
+    +---------------+---------------+
+    |               |               |
+Power BI        Streamlit       LightGBM
+(executives)   (operators)    (forecasting)
+                                    |
+                                 FastAPI
+                              (/predict, /simulate)
+
+         Airflow orchestrates the daily pipeline
 ```
 
 ## Tech stack
 
 | Tool | Role |
 |---|---|
-| Apache Kafka | Event streaming from simulator to warehouse |
-| Snowflake | Cloud data warehouse (Snowpipe Streaming ingestion) |
+| Apache Kafka | Streaming ingestion for charger telemetry |
+| AWS Lambda | Scheduled weather and grid pricing API pulls |
+| AWS S3 | Raw data landing zone for batch sources |
+| Snowflake | Data warehouse (streaming via Snowpipe, batch via S3 external stage) |
 | dbt | SQL transformations with testing, documentation, lineage |
 | Apache Airflow | Pipeline orchestration (dbt -> ML -> BI refresh) |
-| LightGBM | Demand forecasting with spatial features |
+| LightGBM | Demand forecasting with 25 features including spatial |
+| FastAPI | Model serving API (/predict, /simulate endpoints) |
 | Power BI | Executive dashboards (DirectQuery to Snowflake) |
 | Streamlit | Operator console with interactive pricing simulator |
 
@@ -74,7 +94,10 @@ Simulator (Python) --> Kafka topics --> Snowflake RAW tables
 
 ```
 voltsense/
-├── simulator/               Data producers (charger events, weather, pricing)
+├── simulator/               Charger event producer (Kafka)
+├── lambdas/                 AWS Lambda functions (weather + grid pricing)
+│   ├── weather_puller/      Pulls Open-Meteo API, writes to S3
+│   └── grid_price_puller/   Pulls EIA API, writes to S3
 ├── scripts/                 Utility scripts (seed generation, Kafka-Snowflake bridge)
 ├── dbt/voltsense_dbt/       Transformations (staging -> intermediate -> marts)
 │   ├── models/
@@ -86,6 +109,7 @@ voltsense/
 │   ├── seeds/               Static reference data (station metadata, holidays)
 │   └── tests/               Custom data quality assertions
 ├── ml/                      Model training and batch prediction
+├── api/                     FastAPI model serving endpoint
 ├── airflow/dags/            Daily pipeline DAG
 ├── streamlit/               Operator dashboard (health monitor, pricing sim)
 ├── powerbi/                 Dashboard documentation and wireframes
@@ -118,6 +142,8 @@ See [docs/folder_guide.md](docs/folder_guide.md) for details on each folder.
 - [ ] Step 7: Airflow DAG
 - [ ] Step 8: Power BI dashboards
 - [ ] Step 9: Streamlit operator console
+- [ ] Refactor: Move weather + pricing from Kafka to Lambda + S3
+- [ ] Addition: FastAPI model serving endpoint
 
 ## Author
 
