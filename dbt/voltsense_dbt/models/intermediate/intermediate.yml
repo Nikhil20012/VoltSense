@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: int_sessions_enriched
+    description: "Charging sessions joined with weather and grid pricing"
+
+  - name: int_station_utilization_15min
+    description: "Station utilization aggregated to 15-minute intervals"
+
+  - name: int_station_pairs
+    description: "Pre-computed station pairs within 3 km using Haversine"
+
+  - name: int_spatial_demand_features
+    description: "Distance-weighted neighbor utilization per station per 15-min slot"
