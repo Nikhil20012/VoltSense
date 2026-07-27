@@ -155,14 +155,15 @@ See [docs/folder_guide.md](docs/folder_guide.md) for details on each folder.
 ## Build progress
 
 - [x] Project structure
-- [ ] Step 0: Local environment (Kafka, Snowflake, Python)
-- [ ] Step 1: Charger simulator producing to Kafka
-- [ ] Step 2: Kafka to Snowflake ingestion
-- [ ] Step 3: dbt staging models
-- [ ] Step 4: dbt intermediate models (spatial features)
-- [ ] Step 5: dbt marts (star schema)
-- [ ] Step 6: LightGBM training and SHAP validation
-- [ ] Step 7: Airflow DAG
+- [x] Step 0: Local environment (Kafka, Snowflake, Python)
+- [x] Step 1: Charger simulator producing to Kafka
+- [x] Step 2: Kafka to Snowflake ingestion
+- [x] Step 3: dbt staging models (3 models)
+- [x] Step 4: dbt intermediate models (4 models, spatial features)
+- [x] Step 5: dbt marts (6 models, star schema)
+- [x] Step 6: LightGBM training and SHAP validation
+- [x] Step 7: Airflow DAG (6-task linear pipeline)
+- [x] dbt tests (34 passing)
 - [ ] Step 8: Power BI dashboards
 - [ ] Step 9: Streamlit operator console
 - [ ] Refactor: Move weather + pricing from Kafka to Lambda + S3
