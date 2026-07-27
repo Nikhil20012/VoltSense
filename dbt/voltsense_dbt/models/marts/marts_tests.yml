@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: dim_station
+    columns:
+      - name: station_id
+        tests:
+          - unique
+          - not_null
+      - name: latitude
+        tests:
+          - not_null
+      - name: longitude
+        tests:
+          - not_null
+
+  - name: dim_date_time
+    columns:
+      - name: date_time_15min
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_geography
+    columns:
+      - name: geo_key
+        tests:
+          - unique
+          - not_null
+
+  - name: fact_charging_sessions
+    columns:
+      - name: session_id
+        tests:
+          - not_null
+      - name: station_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_station')
+              field: station_id
+
+  - name: fact_station_utilization_15min
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+      - name: utilization_pct
+        tests:
+          - not_null
+
+  - name: fact_anomaly_flags
+    columns:
+      - name: anomaly_id
+        tests:
+          - unique
+          - not_null
+      - name: anomaly_type
+        tests:
+          - accepted_values:
+              values: ['GHOST_SESSION', 'CAPACITY_BREACH', 'DEMAND_SPIKE', 'CLUSTER_OVERLOAD']

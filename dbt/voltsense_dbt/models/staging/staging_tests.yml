@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_sessions
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: station_id
+        tests:
+          - not_null
+      - name: event_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['SESSION_START', 'HEARTBEAT', 'SESSION_END']
+      - name: power_kw
+        tests:
+          - not_null
+
+  - name: stg_weather
+    columns:
+      - name: weather_reading_id
+        tests:
+          - unique
+          - not_null
+      - name: region_id
+        tests:
+          - not_null
+      - name: temperature_c
+        tests:
+          - not_null
+
+  - name: stg_grid_pricing
+    columns:
+      - name: pricing_id
+        tests:
+          - unique
+          - not_null
+      - name: zone_id
+        tests:
+          - not_null
+      - name: price_per_kwh_usd
+        tests:
+          - not_null

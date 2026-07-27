@@ -58,7 +58,7 @@ select
     round(a.peak_power_kw, 2)    as peak_power_kw,
     round(a.total_power_kw, 2)   as total_power_kw,
     greatest(sm.total_connectors - a.active_sessions, 0) as available_connectors,
-    round(a.total_power_kw / nullif(sm.max_capacity_kw, 0) * 100, 1) as utilization_pct,
+    least(100, round(a.total_power_kw / nullif(sm.max_capacity_kw, 0) * 100, 1)) as utilization_pct,
     hour(a.timestamp_15min)           as hour_of_day,
     dayofweek(a.timestamp_15min)      as day_of_week,
     case
