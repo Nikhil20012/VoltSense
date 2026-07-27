@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw
+    database: VOLTSENSE
+    schema: RAW
+    tables:
+      - name: raw_charger_sessions
+      - name: raw_weather_readings
+      - name: raw_grid_pricing

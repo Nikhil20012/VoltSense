@@ -1,0 +1,39 @@
+name: voltsense_dbt
+version: 1.0.0
+config-version: 2
+
+profile: voltsense
+
+model-paths: ["models"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+seeds:
+  voltsense_dbt:
+    station_metadata:
+      +column_types:
+        station_id: varchar
+        latitude: float
+        longitude: float
+        max_capacity_kw: float
+        total_connectors: integer
+
+models:
+  voltsense_dbt:
+    staging:
+      +materialized: incremental
+      +schema: STAGING
+    intermediate:
+      +materialized: incremental
+      +schema: INTERMEDIATE
+    marts:
+      +materialized: table
+      +schema: MARTS
+    ml_features:
+      +materialized: table
+      +schema: ML_FEATURES
