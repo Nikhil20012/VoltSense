@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: ml_training_dataset
+    description: "Flat feature table for LightGBM training"
