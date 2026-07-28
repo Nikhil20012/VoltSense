@@ -164,10 +164,11 @@ See [docs/folder_guide.md](docs/folder_guide.md) for details on each folder.
 - [x] Step 6: LightGBM training and SHAP validation
 - [x] Step 7: Airflow DAG (6-task linear pipeline)
 - [x] dbt tests (34 passing)
-- [ ] Step 8: Power BI dashboards
-- [ ] Step 9: Streamlit operator console
-- [ ] Refactor: Move weather + pricing from Kafka to Lambda + S3
-- [ ] Addition: FastAPI model serving endpoint
+- [x] Step 8: Streamlit operator console (3 pages)
+- [x] FastAPI model serving (/health, /predict, /simulate)
+- [x] Lambda handlers for weather and grid pricing (tested locally)
+- [ ] Power BI dashboards (needs Windows)
+- [ ] AWS deployment (Lambda + S3 + Snowflake external stage)
 
 ## Author
 
