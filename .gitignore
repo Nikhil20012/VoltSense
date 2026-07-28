@@ -52,3 +52,5 @@ logs/
 
 # Docker volumes
 infrastructure/docker/volumes/
+lambdas/weather_puller/output/
+lambdas/grid_price_puller/output/
